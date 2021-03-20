@@ -1,0 +1,28 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+C:/Users/75414/Desktop/project/library/book_management.h
+stdio.h
+-
+
+C:/Users/75414/Desktop/project/library/user.c
+book_management.h
+C:/Users/75414/Desktop/project/library/book_management.h
+users.h
+C:/Users/75414/Desktop/project/library/users.h
+stdio.h
+-
+stdlib.h
+-
+string.h
+-
+
+C:/Users/75414/Desktop/project/library/users.h
+stdio.h
+-
+
