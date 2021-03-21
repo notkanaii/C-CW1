@@ -22,6 +22,7 @@ typedef struct _BookArray {
     Book array; // pointer to array (or linked list) of struct Book.
     unsigned int length; // number of elements in the (Book*) array
     struct _BookArray* pnext;
+    struct _BookArray* searchlink;
 }BookArray;
 
 
@@ -72,7 +73,7 @@ BookArray* find_book_by_author (const char *author,BookArray* headNode);
 //returns a BookArray structure, where the field "array" is a newly allocated array of books, or null if no book with the 
 //provided title can be found. The length of the array is also recorded in the returned structure, with 0 in case
 //array is the null pointer.
-BookArray* find_book_by_year (unsigned int year,BookArray* headNode);
+BookArray* find_book_by_year (int year,BookArray* headNode);
 
 
 

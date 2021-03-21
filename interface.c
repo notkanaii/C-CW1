@@ -36,6 +36,7 @@ BookArray * createHead(){
     BookArray* headNode = (BookArray*)malloc(sizeof(BookArray));
     headNode->pnext = NULL;
     headNode->length = 0;
+    headNode->searchlink =NULL;
     return headNode;
 }
 
@@ -47,7 +48,7 @@ User* CreateHuser(){
 
 
 static void main_menu(BookArray* headNode, User* headUser) {
-    BookArray* flaghead = headNode;
+    BookArray* test;
     int choice = 5;
 
     do {
@@ -67,9 +68,10 @@ static void main_menu(BookArray* headNode, User* headUser) {
                 search_book(headNode);
                 break;
             case 4:
-                while (flaghead->pnext!=NULL){
-                    display_books(flaghead);
-                    flaghead = flaghead->pnext;
+                test = headNode->pnext;
+                while (test != NULL){
+                    display_books(test);
+                    test=test->pnext;
                 }
                 break;
             case 5:

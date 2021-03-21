@@ -41,7 +41,7 @@ static char *ask_question(const char *question) {
 
 static void lib_menu(BookArray* headNode){
     int choice = 5;
-
+    BookArray* test;
     do {
         char * answer = ask_question("\nPlease choose an option\n1) Add a book\n2) Remove a book\n3) Search for books\n4) Display all books\n5) Log out\n Option: ");
         choice = atoi(answer);
@@ -57,7 +57,11 @@ static void lib_menu(BookArray* headNode){
                 search_book(headNode);
                 break;
             case 4:
-                display_books(headNode);
+                test = headNode->pnext;
+                while (test != NULL){
+                    display_books(test);
+                    test=test->pnext;
+                }
                 break;
             case 5:
                 printf("Logging out...");
@@ -137,7 +141,7 @@ void Register_account(User* headUser){
 void Login_account(BookArray* headNode, User* headUser){
         char* name = ask_question("Please enter your username: ");
         char* word = ask_question("Please enter your password: ");
-        char* adm = "librarian";
+        char* adm = "li";
         User* up = headUser;
         if(strcmp(name, adm) == 0 && strcmp(word, adm) == 0){
             lib_menu(headNode);
