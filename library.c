@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "users.h"
 #include "book_management.h"
 
 
@@ -32,51 +33,76 @@ static char *ask_question(const char *question) {
 
 
 BookArray* find_book_by_title (const char *title,BookArray* headNode){
-    BookArray* pfind = headNode;
-    if(strcmp(title,pfind->array.title) == 0) return pfind;
-    while(strcmp(title,pfind->array.title)!=0){
+    BookArray* pfind = headNode->pnext;
+    while(pfind!=NULL&&strcmp(title,pfind->array.title)!=0){
         pfind = pfind->pnext;
-        if(pfind->pnext == NULL) return NULL;
-        if(strcmp(title,pfind->array.title) == 0) return pfind;
     }
     return pfind;
 }
 
 
 BookArray* find_book_by_author (const char *author, BookArray* headNode){
-    BookArray* pfind = headNode;
-    if(strcmp(author,pfind->array.authors) == 0) return pfind;
-    while(strcmp(author,pfind->array.authors) != 0){
+    BookArray* pfind = headNode->pnext;
+    while(pfind!=NULL&&strcmp(author,pfind->array.authors) != 0){
         pfind = pfind->pnext;
-        if(pfind->pnext == NULL) return NULL;
-        if(strcmp(author,pfind->array.authors) == 0) return pfind;
     }
     return pfind;
 }
 
 
 BookArray* find_book_by_year (int year,BookArray* headNode){
-    BookArray* pfind = headNode->pnext;
-    if(pfind->array.year == year) return pfind;
-    while(year!=pfind->array.year){
-        pfind = pfind->pnext;
-        if(pfind->pnext == NULL) return NULL;
-        if(pfind->array.year == year) return pfind;
+    BookArray*p=headNode->pnext;
+    while(p!=NULL&&year!=p->array.year){
+        p = p->pnext;
     }
-    return NULL;
+    return p;
 }
+
 
 BookArray* find_book_by_id (int id,BookArray* headNode){
-    BookArray* pfind = headNode->pnext;
-    if(pfind->array.id == id) return pfind;
-    while(id!=pfind->array.id){
-        pfind = pfind->pnext;
-        if(pfind->pnext == NULL) return NULL;
-        if(pfind->array.id == id) return pfind;
+    BookArray*p=headNode->pnext;
+    while(p!=NULL&&id!=p->array.id){
+        p = p->pnext;
     }
-    return NULL;
+    return p;
 }
 
+void borrow_book(User user, BookArray* book){
+    if(book->array.copies > 0 &&  user.number < 10){
+        book->array.copies--;
+        user.books[user.number] = book->array;
+        user.number ++;
+        printf("Borrowed succeeded. \n");
+    }else{
+        printf("Sorry, you can not borrow this book. ");
+    }
+}
+
+void return_book(User user){
+    int n = 0;
+    int i = 0;
+    while(n<user.number){
+        printf("%s", user.books[user.number].title);
+    }
+    char* answer = ask_question("\nThe name of book you want to return: ");
+    while(n<user.number){
+        if(strcmp(user.books[n].title,answer)) {
+            user.books[n].id = 0;
+            user.number--;
+            break;
+        }
+    n++;
+    }
+    n = 0;
+    while(n<user.number){
+        if((user.books[n].id = 0)){
+            i = n;
+        }
+    }
+    while(i<user.number){
+        user.books[i] = user.books[i+1];
+    }
+}
 
 
 int display_books(BookArray* headNode){
@@ -124,7 +150,7 @@ int add_book(BookArray* headNode){
     {
         p = p->pnext;
     }
-    if (headNode == NULL) {
+    if (headNode->pnext == NULL) {
         headNode->pnext = pNewA;
     }
     else {
@@ -181,22 +207,19 @@ void search_book(BookArray* headNode){
         free(answer);
         switch (choice0) {
             case 1: {
-                BookArray* find = createHead();
-                BookArray* follow;
-                BookArray* first;
+                BookArray* find = NULL;
+                BookArray *follow = NULL;
+                BookArray* first = NULL;
                 char *title = ask_question("Please enter title: ");
                 find = find_book_by_title(title, headNode);
                 first = find;
                 follow = find;
-                while(find->pnext != NULL){
-                    find->pnext = find_book_by_title(title, follow);
-                    follow = find;
-                }
-                while (first != NULL){
-                    display_books(first);
-                    first = first->pnext;
+                while(find!= NULL){
+                    find = find_book_by_title(title, find);
+                    if(find==NULL) {
+                        break;
+                    }
                     follow->searchlink= find;
-                    if(follow->searchlink==NULL) break;
                     follow = follow->searchlink;
                     find = find->pnext;
                 }
@@ -207,17 +230,19 @@ void search_book(BookArray* headNode){
                 break;
             }
             case 2: {
-                BookArray* find = createHead();
-                BookArray* follow;
-                BookArray* first;
+                BookArray* find = NULL;
+                BookArray *follow = NULL;
+                BookArray* first = NULL;
                 char *author = ask_question("Please enter author: ");
                 find = find_book_by_author(author, headNode);
                 first = find;
                 follow = find;
                 while(find!= NULL){
-                    find = find_book_by_author(author, headNode);
+                    find = find_book_by_author(author, find);
+                    if(find==NULL) {
+                        break;
+                    }
                     follow->searchlink= find;
-                    if(follow->searchlink==NULL) break;
                     follow = follow->searchlink;
                     find = find->pnext;
                 }
@@ -228,17 +253,19 @@ void search_book(BookArray* headNode){
                 break;
             }
             case 3: {
-                BookArray* find;
+                BookArray* find = NULL;
                 BookArray *follow = NULL;
-                BookArray* first;
+                BookArray* first = NULL;
                 int year = atoi(ask_question("Please enter year: "));
                 find = find_book_by_year(year, headNode);
                 first = find;
                 follow = find;
                 while(find!= NULL){
                     find = find_book_by_year(year, find);
+                    if(find==NULL) {
+                        break;
+                    }
                     follow->searchlink= find;
-                    if(follow->searchlink==NULL) break;
                     follow = follow->searchlink;
                     find = find->pnext;
                 }

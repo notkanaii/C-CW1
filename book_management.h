@@ -75,6 +75,8 @@ BookArray* find_book_by_author (const char *author,BookArray* headNode);
 //array is the null pointer.
 BookArray* find_book_by_year (int year,BookArray* headNode);
 
+BookArray* find_book_by_id (int id,BookArray* headNode);
+
 
 
 #endif

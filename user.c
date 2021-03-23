@@ -7,10 +7,6 @@
 
 
 
-void borrow_book(){};
-
-
-void return_book(){};
 
 static char *ask_question(const char *question) {
 
@@ -74,8 +70,10 @@ static void lib_menu(BookArray* headNode){
 }
 
 
-static void user_menu(char* uname,BookArray* headNode){
+static void user_menu(User* up,BookArray* headNode){
     int choice = 5;
+    int id_s = 0;
+    BookArray *p = NULL;
 
     do {
 
@@ -85,10 +83,16 @@ static void user_menu(char* uname,BookArray* headNode){
 
         switch (choice) {
             case 1:
-                borrow_book();
+                id_s = atoi(ask_question("Enter the book id you want to borrow: "));
+                p = find_book_by_id(id_s, headNode);
+                if (p == NULL) {
+                    printf("Sorry, the id is invalid. \n");
+                    break;
+                }
+                else borrow_book(up, p);
                 break;
             case 2:
-                return_book();
+                return_book(up);
                 break;
             case 3:
                 search_book(headNode);
@@ -111,6 +115,7 @@ static void user_menu(char* uname,BookArray* headNode){
 void Register_account(User* headUser){
         User* pNewU = (User*)malloc(sizeof(User));
         pNewU->nextp = NULL;
+        pNewU->number = 0;
         User* up = headUser;
         int flag = 0;
         char* name = ask_question("Please enter a username: ");
@@ -151,7 +156,7 @@ void Login_account(BookArray* headNode, User* headUser){
                 up = up->nextp;
             }
             if(strcmp(name,up->username) == 0 && strcmp(word,up->password) == 0){
-                user_menu(name,headNode);
+                user_menu(up,headNode);
             };
         }
 };
