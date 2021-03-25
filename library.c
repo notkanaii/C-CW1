@@ -70,7 +70,7 @@ BookArray* find_book_by_id (int id,BookArray* headNode){
 void borrow_book(User user, BookArray* book){
     if(book->array.copies > 0 &&  user.number < 10){
         book->array.copies--;
-        user.books[user.number] = book->array;
+        user.books[user.number] = book->array.id;
         user.number ++;
         printf("Borrowed succeeded. \n");
     }else{
@@ -78,30 +78,49 @@ void borrow_book(User user, BookArray* book){
     }
 }
 
-void return_book(User user){
+
+
+void return_book(User* user, BookArray* headNode){
     int n = 0;
     int i = 0;
-    while(n<user.number){
-        printf("%s", user.books[user.number].title);
+    int s = 0;
+    BookArray* pi = NULL;
+    pi = headNode->pnext;
+    printf("\nThe books id you have borrowed: ");
+    while(n<user->number){
+        printf("\n%i", user->books[n]);
+        n++;
     }
-    char* answer = ask_question("\nThe name of book you want to return: ");
-    while(n<user.number){
-        if(strcmp(user.books[n].title,answer)) {
-            user.books[n].id = 0;
-            user.number--;
+    n = 0;
+    int answer = atoi(ask_question("\nThe id of book you want to return: "));
+    while(n<user->number){
+        if(user->books[n] == answer) {
+            s = user->books[n];
+            user->books[n] = 999;
+            user->number--;
             break;
         }
     n++;
     }
     n = 0;
-    while(n<user.number){
-        if((user.books[n].id = 0)){
+    while(n<=user->number){
+        if((user->books[n] = 999)){
             i = n;
+            break;
+        }
+        n++;
+    }
+    while(i<=user->number){
+        user->books[i] = user->books[i+1];
+        i++;
+    }
+    while(pi){
+        if(s == pi->array.id){
+            pi->array.copies++;
+            break;
         }
     }
-    while(i<user.number){
-        user.books[i] = user.books[i+1];
-    }
+    printf("Return succeeded. \n");
 }
 
 
@@ -113,25 +132,6 @@ int display_books(BookArray* headNode){
            headNode->array.authors,
            headNode->array.year,
            headNode->array.copies);
-    return 0;
-}
-
-
-int store_books(BookArray* headNode){
-    FILE*fp;
-    if ((fp=fopen("library.txt","r"))==NULL)
-    {
-        fp=fopen("library.txt","w");
-        fclose(fp);
-    }
-    fp = fopen("library.txt", "w");
-    BookArray *p = headNode;
-    while (p != NULL)
-    {
-        fwrite(p, sizeof(BookArray), 1, fp);
-        p = p->pnext;
-    }
-    fclose(fp);
     return 0;
 }
 
@@ -160,21 +160,110 @@ int add_book(BookArray* headNode){
 }
 
 
+int store_books(BookArray* headNode){
+    FILE*fp;
+    BookArray *p = headNode->pnext;
+    fp = fopen("file.txt", "wb");
+    while(p)
+    {
+        //printf("\nAAAAAAA");        检测是否存进去
+        fwrite(&(p->array.id), sizeof(int), 1,fp);
+        fwrite(p->array.title, 50*sizeof(char), 1,fp);
+        fwrite(p->array.authors, 50*sizeof(char), 1,fp);
+        fwrite(&(p->array.year), sizeof(int), 1,fp);
+        fwrite(&(p->array.copies), sizeof(int), 1,fp);
+        p=p->pnext;
+    }
+    fclose(fp);
+    return 0;
+}
+
+
+
 int load_books(BookArray* headNode){
     FILE*fp;
-    fp = fopen("library.txt","r");
-    BookArray* last = (BookArray*)malloc(sizeof(BookArray));
-    last = headNode;
-    while (!feof(fp)) {
+    BookArray* qn=headNode;
+    if ((fp=fopen("file.txt","rb"))==NULL)
+    {
+        fp=fopen("file.txt","wb");
+        fclose(fp);
+    }
+    fp = fopen("file.txt","rb");
+    int a = 0;
+    while (fread(&a,sizeof(int),1,fp)) {
         BookArray* pn = (BookArray*)malloc(sizeof(BookArray));
-        if(last->pnext == NULL) headNode->pnext = pn;
-        fread(pn,sizeof(BookArray),1,fp);
-        last->pnext=pn;
-        last=pn;
-        pn->pnext = NULL;
+        pn->pnext=NULL;
+        pn->array.title =(char*)malloc(50*sizeof(char));
+        pn->array.authors =(char*)malloc(50*sizeof(char));
+        //memset(pn->array.title, 0,50*sizeof(char));
+        //memset(pn->array.authors, 0,50*sizeof(char));
+        //fread(&(pn->array.id),sizeof(int),1,fp);
+        pn->array.id = a;
+        fread(pn->array.title,50*sizeof(char),1,fp);
+        fread(pn->array.authors,50*sizeof(char),1,fp);
+        fread(&(pn->array.year), sizeof(int), 1,fp);
+        fread(&(pn->array.copies), sizeof(int), 1,fp);
+        qn->pnext=pn;
+        qn=pn;
+        if(feof(fp)) break;
     }
     if(headNode->pnext != NULL) return 0;
+    fclose(fp);
 }
+
+
+int store_users(User* headUser){
+    FILE*fp;
+    User *p = headUser->nextp;
+    fp = fopen("user.txt", "wb");
+    while(p)
+    {
+        //printf("\nAAAAAAA");        检测是否存进去
+        fwrite(&(p->number), sizeof(int), 1,fp);
+        fwrite(p->username, 50*sizeof(char), 1,fp);
+        fwrite(p->password, 50*sizeof(char), 1,fp);
+        for(int i = 0;i<10;i++){
+            fwrite(&(p->books[i]), sizeof(int), 1,fp);
+        }
+        p=p->nextp;
+    }
+    fclose(fp);
+    return 0;
+}
+
+
+
+int load_users(User* headUser){
+    FILE*fp;
+    User* qn=headUser;
+    if ((fp=fopen("user.txt","rb"))==NULL)
+    {
+        fp=fopen("user.txt","wb");
+        fclose(fp);
+    }
+    fp = fopen("user.txt","rb");
+    int a = 0;
+    while (fread(&a,sizeof(int),1,fp)) {
+        User * pn = (User*)malloc(sizeof(User));
+        pn->number = a;
+        pn->nextp=NULL;
+        pn->username =(char*)malloc(50*sizeof(char));
+        pn->password =(char*)malloc(50*sizeof(char));
+        fread(pn->username, 50*sizeof(char), 1,fp);
+        fread(pn->password, 50*sizeof(char), 1,fp);
+        for(int i = 0;i<10;i++){
+
+            fread(&(pn->books[i]), sizeof(int), 1,fp);
+
+        }
+        qn->nextp=pn;
+        qn=pn;
+    }
+    if(headUser->nextp != NULL) return 0;
+    fclose(fp);
+}
+
+
 
 int remove_book(BookArray* headNode){
     search_book(headNode);

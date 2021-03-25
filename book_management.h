@@ -11,11 +11,11 @@
 
 
 typedef struct _Book {
-    unsigned int id; //Book ID
+    int id; //Book ID
     char *title; //book title
     char *authors; //comma separated list of authors
-    unsigned int year; // year of publication
-    unsigned int copies; //number of copies the library has
+    int year; // year of publication
+    int copies; //number of copies the library has
 }Book;
 
 typedef struct _BookArray {

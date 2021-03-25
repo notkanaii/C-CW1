@@ -43,12 +43,13 @@ BookArray * createHead(){
 User* CreateHuser(){
     User* headUser = (User*)malloc(sizeof(User));
     headUser->nextp = NULL;
+
     return headUser;
 };
 
 
 static void main_menu(BookArray* headNode, User* headUser) {
-    BookArray* test;
+    BookArray* test = NULL;
     int choice = 5;
 
     do {
@@ -88,6 +89,10 @@ static void main_menu(BookArray* headNode, User* headUser) {
 int main(){
     BookArray* headNode = createHead();
     User* headUser = CreateHuser();
+    //load_users(headUser);
+    //load_books(headNode);
     main_menu(headNode, headUser);
+    //store_books(headNode);
+    //store_users(headUser);
     return 0;
 }

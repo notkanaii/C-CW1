@@ -36,6 +36,7 @@ static char *ask_question(const char *question) {
 
 
 static void lib_menu(BookArray* headNode){
+    printf("(Logged as librarian)");
     int choice = 5;
     BookArray* test;
     do {
@@ -47,6 +48,10 @@ static void lib_menu(BookArray* headNode){
                 add_book(headNode);
                 break;
             case 2:
+                if(headNode->pnext== NULL){
+                    printf("No book can be removed. ");
+                    break;
+                }
                 remove_book(headNode);
                 break;
             case 3:
@@ -71,6 +76,8 @@ static void lib_menu(BookArray* headNode){
 
 
 static void user_menu(User* up,BookArray* headNode){
+    printf("(Logged as %s)", up->username);
+    BookArray* test = NULL;
     int choice = 5;
     int id_s = 0;
     BookArray *p = NULL;
@@ -92,13 +99,21 @@ static void user_menu(User* up,BookArray* headNode){
                 else borrow_book(up, p);
                 break;
             case 2:
-                return_book(up);
+                if(up->books[0] ==0){
+                    printf("You haven't borrow any book. ");
+                    break;
+                }
+                return_book(up, headNode);
                 break;
             case 3:
                 search_book(headNode);
                 break;
             case 4:
-                display_books(headNode);
+                test = headNode->pnext;
+                while (test != NULL){
+                    display_books(test);
+                    test=test->pnext;
+                }
                 break;
             case 5:
                 printf("Logging out...");
@@ -131,15 +146,19 @@ void Register_account(User* headUser){
         }
         if(flag == 1) {
             free(pNewU);
+        }else{
+            if(headUser == NULL){
+                headUser->nextp = pNewU;
+            }
+            else{
+                up->nextp = pNewU;
+            }
+            for(int i = 0;i<10;i++){
+                pNewU->books[i]=0;
+            }
+            pNewU->username = name;
+            pNewU->password = word;
         }
-        if(headUser == NULL){
-            headUser->nextp = pNewU;
-        }
-        else{
-            up->nextp = pNewU;
-        }
-        pNewU->username = name;
-        pNewU->password = word;
 };
 
 
@@ -157,7 +176,9 @@ void Login_account(BookArray* headNode, User* headUser){
             }
             if(strcmp(name,up->username) == 0 && strcmp(word,up->password) == 0){
                 user_menu(up,headNode);
-            };
+            }else{
+                printf("Login unsuccessful. Please check your username and password. \n");
+            }
         }
 };
 
