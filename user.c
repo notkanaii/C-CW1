@@ -80,6 +80,8 @@ static void user_menu(User* up,BookArray* headNode){
     BookArray* test = NULL;
     int choice = 5;
     int id_s = 0;
+    int check_r = 0;
+    int flag = 0;
     BookArray *p = NULL;
 
     do {
@@ -90,31 +92,47 @@ static void user_menu(User* up,BookArray* headNode){
 
         switch (choice) {
             case 1:
+
                 id_s = atoi(ask_question("Enter the book id you want to borrow: "));
+                while (check_r <= up->number) {
+                    if (up->books[check_r] == id_s) {
+                        printf("\n You have borrowed this book. ");
+                        flag = 1;
+                        break;
+                    }
+                    check_r++;
+                }
+                check_r = 0;
+                if(flag == 1) {
+                    flag = 0;
+                    continue;
+                }
                 p = find_book_by_id(id_s, headNode);
                 if (p == NULL) {
-                    printf("Sorry, the id is invalid. \n");
-                    break;
+                    printf("\nSorry, the id is invalid. ");
+                    continue;
                 }
                 else borrow_book(up, p);
-                break;
+                continue;
             case 2:
                 if(up->books[0] ==0){
                     printf("You haven't borrow any book. ");
-                    break;
+                    continue;
                 }
                 return_book(up, headNode);
-                break;
+                continue;
             case 3:
+                printf("\nID\tTitle\t\t\t\tAuthors\t\t\t\tYear\t\tCopies\n");
                 search_book(headNode);
-                break;
+                continue;
             case 4:
+                printf("\nID\tTitle\t\t\t\tAuthors\t\t\t\tYear\t\tCopies\n");
                 test = headNode->pnext;
                 while (test != NULL){
                     display_books(test);
                     test=test->pnext;
                 }
-                break;
+                continue;
             case 5:
                 printf("Logging out...");
                 break;
@@ -128,58 +146,60 @@ static void user_menu(User* up,BookArray* headNode){
 
 
 void Register_account(User* headUser){
-        User* pNewU = (User*)malloc(sizeof(User));
-        pNewU->nextp = NULL;
-        pNewU->number = 0;
-        User* up = headUser;
-        int flag = 0;
-        char* name = ask_question("Please enter a username: ");
-        char* word = ask_question("Please enter a password: ");
-        while (headUser != NULL && up->nextp != NULL)
-        {
-            up = up->nextp;
-            if(strcmp(name,up->username)==0){
-                printf("Sorry, Register unsuccessful, the username you entered has already exist.\n");
-                flag = 1;
-                break;
-            }
+    User* pNewU = (User*)malloc(sizeof(User));
+    pNewU->nextp = NULL;
+    pNewU->number = 0;
+    User* up = headUser;
+    int flag = 0;
+    char* name = ask_question("Please enter a username: ");
+    char* word = ask_question("Please enter a password: ");
+    while (headUser != NULL && up->nextp != NULL)
+    {
+        up = up->nextp;
+        if(strcmp(name,up->username)==0){
+            printf("Sorry, Register unsuccessful, the username you entered has already exist.\n");
+            flag = 1;
+            break;
         }
-        if(flag == 1) {
-            free(pNewU);
-        }else{
-            if(headUser == NULL){
-                headUser->nextp = pNewU;
-            }
-            else{
-                up->nextp = pNewU;
-            }
-            for(int i = 0;i<10;i++){
-                pNewU->books[i]=0;
-            }
-            pNewU->username = name;
-            pNewU->password = word;
+    }
+    if(flag == 1) {
+        free(pNewU);
+    }else{
+        if(headUser == NULL){
+            headUser->nextp = pNewU;
         }
+        else{
+            up->nextp = pNewU;
+        }
+        for(int i = 0;i<10;i++){
+            pNewU->books[i]=0;
+        }
+        pNewU->username = name;
+        pNewU->password = word;
+        printf("\nRegister succeeded. ");
+    }
+
 };
 
 
 void Login_account(BookArray* headNode, User* headUser){
-        char* name = ask_question("Please enter your username: ");
-        char* word = ask_question("Please enter your password: ");
-        char* adm = "li";
-        User* up = headUser;
-        if(strcmp(name, adm) == 0 && strcmp(word, adm) == 0){
-            lib_menu(headNode);
+    char* name = ask_question("Please enter your username: ");
+    char* word = ask_question("Please enter your password: ");
+    char* adm = "li";
+    User* up = headUser;
+    if(strcmp(name, adm) == 0 && strcmp(word, adm) == 0){
+        lib_menu(headNode);
+    }
+    else {
+        while(headUser != NULL && up->nextp != NULL && strcmp(name,up->username)!= 0){
+            up = up->nextp;
         }
-        else {
-            while(headUser != NULL && up->nextp != NULL && strcmp(name,up->username)!= 0){
-                up = up->nextp;
-            }
-            if(strcmp(name,up->username) == 0 && strcmp(word,up->password) == 0){
-                user_menu(up,headNode);
-            }else{
-                printf("Login unsuccessful. Please check your username and password. \n");
-            }
+        if(strcmp(name,up->username) == 0 && strcmp(word,up->password) == 0){
+            user_menu(up,headNode);
+        }else{
+            printf("Login unsuccessful. Please check your username and password. \n");
         }
+    }
 };
 
 

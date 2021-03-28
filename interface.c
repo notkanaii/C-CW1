@@ -37,6 +37,7 @@ BookArray * createHead(){
     headNode->pnext = NULL;
     headNode->length = 0;
     headNode->searchlink =NULL;
+    headNode->array.id = 0;
     return headNode;
 }
 
@@ -70,10 +71,12 @@ static void main_menu(BookArray* headNode, User* headUser) {
                 break;
             case 4:
                 test = headNode->pnext;
+                printf("\nID\tTitle\t\t\t\tAuthors\t\t\t\tYear\t\tCopies");
                 while (test != NULL){
                     display_books(test);
                     test=test->pnext;
                 }
+                printf("\n");
                 break;
             case 5:
                 printf("Thank you for using the library!\nGoodbye!");
@@ -89,10 +92,22 @@ static void main_menu(BookArray* headNode, User* headUser) {
 int main(){
     BookArray* headNode = createHead();
     User* headUser = CreateHuser();
-    //load_users(headUser);
-    //load_books(headNode);
+    BookArray* f1 = NULL;
+    User* f2 = NULL;
+    load_users(headUser);
+    load_books(headNode);
     main_menu(headNode, headUser);
-    //store_books(headNode);
-    //store_users(headUser);
+    store_books(headNode);
+    store_users(headUser);
+    while(headNode){
+        f1 = headNode;
+        headNode = headNode->pnext;
+        free(f1);
+    }
+    while(headUser){
+        f2 = headUser;
+        headUser = headUser->nextp;
+        free(f2);
+    }
     return 0;
 }
