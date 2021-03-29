@@ -1,5 +1,4 @@
 #include "book_management.h"
-#include "interface.h"
 #include "users.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -7,33 +6,27 @@
 
 
 static char *ask_question(const char *question) {
-
     printf("%s",question);
-
     const int size_step = 2;
     char *answer = malloc(size_step);
-    answer[0] = 0; //now it's a string of length 0.
-
-    //read until a new line in blocks of size_step  bytes at at time
+    answer[0] = 0;
     char *next_chunk = answer;
     int iteration = 0;
     do {
         answer = realloc(answer, size_step + iteration*size_step);
-        next_chunk = answer + strlen(answer); //answer may have moved.
+        next_chunk = answer + strlen(answer);
         fgets(next_chunk, size_step, stdin);
-
-        next_chunk = answer + strlen(answer); //take the new read into account
+        next_chunk = answer + strlen(answer);
         ++iteration;
     } while (* (next_chunk-1) != '\n');
-
-    *(next_chunk-1) = 0; //truncate the string eliminating the new line.
-
+    *(next_chunk-1) = 0;
     return answer;
 }
 
 
 BookArray * createHead(){
     BookArray* headNode = (BookArray*)malloc(sizeof(BookArray));
+    //initialize the head
     headNode->pnext = NULL;
     headNode->length = 0;
     headNode->searchlink =NULL;
@@ -62,22 +55,22 @@ static void main_menu(BookArray* headNode, User* headUser) {
         switch (choice) {
             case 1:
                 Register_account(headUser);
-                break;
+                continue;
             case 2:
                 Login_account(headNode,headUser);
-                break;
+                continue;
             case 3:
                 search_book(headNode);
-                break;
+                continue;
             case 4:
                 test = headNode->pnext;
-                printf("\nID\tTitle\t\t\t\tAuthors\t\t\t\tYear\t\tCopies");
+                printf("\nID\tTitle\t\t\t\t\tAuthors\t\t\t\t\tYear\tCopies");
                 while (test != NULL){
                     display_books(test);
                     test=test->pnext;
                 }
                 printf("\n");
-                break;
+                continue;
             case 5:
                 printf("Thank you for using the library!\nGoodbye!");
                 break;
@@ -99,6 +92,7 @@ int main(){
     main_menu(headNode, headUser);
     store_books(headNode);
     store_users(headUser);
+    //free linkedlist
     while(headNode){
         f1 = headNode;
         headNode = headNode->pnext;

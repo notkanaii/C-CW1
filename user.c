@@ -9,34 +9,27 @@
 
 
 static char *ask_question(const char *question) {
-
     printf("%s",question);
-
     const int size_step = 2;
     char *answer = malloc(size_step);
-    answer[0] = 0; //now it's a string of length 0.
-
-    //read until a new line in blocks of size_step  bytes at at time
+    answer[0] = 0;
     char *next_chunk = answer;
     int iteration = 0;
     do {
         answer = realloc(answer, size_step + iteration*size_step);
-        next_chunk = answer + strlen(answer); //answer may have moved.
+        next_chunk = answer + strlen(answer);
         fgets(next_chunk, size_step, stdin);
-
-        next_chunk = answer + strlen(answer); //take the new read into account
+        next_chunk = answer + strlen(answer);
         ++iteration;
     } while (* (next_chunk-1) != '\n');
-
-    *(next_chunk-1) = 0; //truncate the string eliminating the new line.
-
+    *(next_chunk-1) = 0;
     return answer;
 }
 
 
 
 static void lib_menu(BookArray* headNode){
-    printf("(Logged as librarian)");
+    printf("\n(Logged as librarian)");
     int choice = 5;
     BookArray* test;
     do {
@@ -48,7 +41,7 @@ static void lib_menu(BookArray* headNode){
                 add_book(headNode);
                 break;
             case 2:
-                if(headNode->pnext== NULL){
+                if(headNode->pnext== NULL){//if no book stored
                     printf("No book can be removed. ");
                     break;
                 }
@@ -58,6 +51,7 @@ static void lib_menu(BookArray* headNode){
                 search_book(headNode);
                 break;
             case 4:
+                printf("\nID\tTitle\t\t\t\t\tAuthors\t\t\t\t\tYear\t\tCopies");
                 test = headNode->pnext;
                 while (test != NULL){
                     display_books(test);
@@ -76,8 +70,8 @@ static void lib_menu(BookArray* headNode){
 
 
 static void user_menu(User* up,BookArray* headNode){
-    printf("(Logged as %s)", up->username);
-    BookArray* test = NULL;
+    printf("\n(Logged as %s)", up->username);
+    BookArray* test = NULL;//display all books
     int choice = 5;
     int id_s = 0;
     int check_r = 0;
@@ -94,9 +88,13 @@ static void user_menu(User* up,BookArray* headNode){
             case 1:
 
                 id_s = atoi(ask_question("Enter the book id you want to borrow: "));
-                while (check_r <= up->number) {
+                if(id_s==0){
+                    printf("\nSorry, the id is invalid. ");
+                    break;
+                }
+                while (check_r <= up->number) { //check if the books repeat
                     if (up->books[check_r] == id_s) {
-                        printf("\n You have borrowed this book. ");
+                        printf("\nSorry, you have already borrowed this book. ");
                         flag = 1;
                         break;
                     }
@@ -122,11 +120,11 @@ static void user_menu(User* up,BookArray* headNode){
                 return_book(up, headNode);
                 continue;
             case 3:
-                printf("\nID\tTitle\t\t\t\tAuthors\t\t\t\tYear\t\tCopies\n");
+                printf("\nID\tTitle\t\t\t\t\tAuthors\t\t\t\t\tYear\tCopies");
                 search_book(headNode);
                 continue;
             case 4:
-                printf("\nID\tTitle\t\t\t\tAuthors\t\t\t\tYear\t\tCopies\n");
+                printf("\nID\tTitle\t\t\t\t\tAuthors\t\t\t\t\tYear\tCopies");
                 test = headNode->pnext;
                 while (test != NULL){
                     display_books(test);
@@ -157,7 +155,7 @@ void Register_account(User* headUser){
     {
         up = up->nextp;
         if(strcmp(name,up->username)==0){
-            printf("Sorry, Register unsuccessful, the username you entered has already exist.\n");
+            printf("\nSorry, Register unsuccessful, the username you entered has already exist.\n");
             flag = 1;
             break;
         }
@@ -189,7 +187,7 @@ void Login_account(BookArray* headNode, User* headUser){
     User* up = headUser;
     if(strcmp(name, adm) == 0 && strcmp(word, adm) == 0){
         lib_menu(headNode);
-    }
+    }//login as librarian
     else {
         while(headUser != NULL && up->nextp != NULL && strcmp(name,up->username)!= 0){
             up = up->nextp;
@@ -197,7 +195,7 @@ void Login_account(BookArray* headNode, User* headUser){
         if(strcmp(name,up->username) == 0 && strcmp(word,up->password) == 0){
             user_menu(up,headNode);
         }else{
-            printf("Login unsuccessful. Please check your username and password. \n");
+            printf("\nLogin unsuccessful. Please check your username and password. \n");
         }
     }
 };

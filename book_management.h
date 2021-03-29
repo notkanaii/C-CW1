@@ -54,6 +54,8 @@ void borrow_book();
 
 void return_book();
 
+void run_interface();
+
 BookArray * createHead();
 
 static char *ask_question(const char *question);

@@ -10,4 +10,4 @@ add_executable(library
         interface.c
         library.c
         user.c
-        users.h interface.h main.c cmake-build-debug/main.c)
+        users.h cmake-build-debug/main.c)

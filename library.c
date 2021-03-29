@@ -6,28 +6,32 @@
 
 
 static char *ask_question(const char *question) {
-
     printf("%s", question);
-
     const int size_step = 2;
     char *answer = malloc(size_step);
-    answer[0] = 0; //now it's a string of length 0.
-
-    //read until a new line in blocks of size_step  bytes at at time
+    answer[0] = 0;
     char *next_chunk = answer;
     int iteration = 0;
     do {
         answer = realloc(answer, size_step + iteration * size_step);
-        next_chunk = answer + strlen(answer); //answer may have moved.
+        next_chunk = answer + strlen(answer);
         fgets(next_chunk, size_step, stdin);
-
-        next_chunk = answer + strlen(answer); //take the new read into account
+        next_chunk = answer + strlen(answer);
         ++iteration;
     } while (*(next_chunk - 1) != '\n');
-
-    *(next_chunk - 1) = 0; //truncate the string eliminating the new line.
-
+    *(next_chunk - 1) = 0;
     return answer;
+}
+
+
+int nonumber(char* str){ //make sure no number in string
+    char* p = str;
+    int check = 0;
+    while (check==0 && *p){
+        if(*p>='0'&&*p<='9') check = 1;
+        p++;
+    }
+    return(check?1:0);
 }
 
 
@@ -67,7 +71,7 @@ BookArray *find_book_by_id(int id, BookArray *headNode) {
 }
 
 void borrow_book(User user, BookArray *book) {
-    if (book->array.copies > 0 && user.number < 10) {
+    if (book->array.copies > 0 && user.number < 10) { //the number of books can a student borrow
         book->array.copies--;
         user.books[user.number] = book->array.id;
         user.number++;
@@ -82,7 +86,7 @@ void return_book(User *user, BookArray *headNode) {
     int n = 0;
     int i = 0;
     int s = 0;
-    int f = 0;
+    int f = 0; //flag
     BookArray *pi = NULL;
     pi = headNode->pnext;
     printf("\nThe books id you have borrowed: ");
@@ -117,15 +121,33 @@ void return_book(User *user, BookArray *headNode) {
     else printf("Invalid id. \n");
 }
 
+void check_length(char *words){
+    if(strlen(words)<4){
+        printf("\t\t\t\t\t\t");
+    }else if(strlen(words)>=4&&strlen(words)<8){
+        printf("\t\t\t\t\t");
+    }else if(strlen(words)<12&&strlen(words)>=8){
+        printf("\t\t\t\t");
+    }else if(strlen(words)<16&&strlen(words)>=12){
+        printf("\t\t\t");
+    }else if(strlen(words)>=16&&strlen(words)<20){
+        printf("\t\t");
+    }else{
+        printf("\t");
+    }
+}
+
 
 int display_books(BookArray *headNode) {
     if (headNode->array.id == 0) return 0;
-    printf("\n%i\t%s\t\t\t\t%s\t\t\t\t%i\t\t%i",
-           headNode->array.id,
-           headNode->array.title,
-           headNode->array.authors,
-           headNode->array.year,
-           headNode->array.copies);
+    printf("\n");
+    printf("%i\t",headNode->array.id);
+    printf("%s",headNode->array.title);
+    check_length(headNode->array.title);
+    printf("%s",headNode->array.authors);
+    check_length(headNode->array.authors);
+    printf("%i\t",headNode->array.year);
+    printf("%i",headNode->array.copies);
     return 0;
 }
 
@@ -143,9 +165,9 @@ int add_book(BookArray *headNode) {
         }
         check = check->pnext;
     }
-    if (flag == 1) {
+    if (flag == 1||a==0) {
         free(pNewA);
-        printf("Sorry, the id is repeat. \n");
+        printf("\nSorry, the id is invalid. \n");
         return 0;
     } else {
         pNewA->array.id = a;
@@ -156,6 +178,16 @@ int add_book(BookArray *headNode) {
         pNewA->array.year = atoi(ask_question("input book year: "));
         pNewA->array.copies = atoi(ask_question("input book copies: "));
         BookArray *p = headNode;
+        if(pNewA->array.year==0||pNewA->array.copies==0){
+            printf("\nInvalid year or copies. \n");
+            free(pNewA);
+            return 0;
+        }
+        if(nonumber(pNewA->array.authors)){
+            printf("\nInvalid authors. \n");
+            free(pNewA);
+            return 0;
+        }
         while (headNode != NULL && p->pnext != NULL) {
             p = p->pnext;
         }
@@ -174,7 +206,7 @@ int store_books(BookArray *headNode) {
     BookArray *p = headNode->pnext;
     fp = fopen("file.txt", "wb");
     while (p) {
-        //printf("\nAAAAAAA");        检测是否存进去
+        //printf("\nAAAAAAA");
         fwrite(&(p->array.id), sizeof(int), 1, fp);
         fwrite(p->array.title, 50 * sizeof(char), 1, fp);
         fwrite(p->array.authors, 50 * sizeof(char), 1, fp);
@@ -190,6 +222,7 @@ int store_books(BookArray *headNode) {
 int load_books(BookArray *headNode) {
     FILE *fp;
     BookArray *qn = headNode;
+    // if no this file, create
     if ((fp = fopen("file.txt", "rb")) == NULL) {
         fp = fopen("file.txt", "wb");
         fclose(fp);
@@ -202,8 +235,9 @@ int load_books(BookArray *headNode) {
         pn->searchlink =NULL;
         pn->array.title = (char *) malloc(50 * sizeof(char));
         pn->array.authors = (char *) malloc(50 * sizeof(char));
-        //memset(pn->array.title, 0,50*sizeof(char));
-        //memset(pn->array.authors, 0,50*sizeof(char));
+        //ensure nothing in the string
+        memset(pn->array.title, 0,50*sizeof(char));
+        memset(pn->array.authors, 0,50*sizeof(char));
         //fread(&(pn->array.id),sizeof(int),1,fp);
         pn->array.id = a;
         fread(pn->array.title, 50 * sizeof(char), 1, fp);
@@ -224,7 +258,7 @@ int store_users(User *headUser) {
     User *p = headUser->nextp;
     fp = fopen("user.txt", "wb");
     while (p) {
-        //printf("\nAAAAAAA");        检测是否存进去
+        //printf("\nAAAAAAA");        //check for the loop
         fwrite(&(p->number), sizeof(int), 1, fp);
         fwrite(p->username, 50 * sizeof(char), 1, fp);
         fwrite(p->password, 50 * sizeof(char), 1, fp);
@@ -240,7 +274,7 @@ int store_users(User *headUser) {
 
 int load_users(User *headUser) {
     FILE *fp;
-    User *qn = headUser;
+    User *qn = headUser; //follow the node
     if ((fp = fopen("user.txt", "rb")) == NULL) {
         fp = fopen("user.txt", "wb");
         fclose(fp);
@@ -290,6 +324,7 @@ int remove_book(BookArray *headNode) {
             return 0;
         }
     }
+    //If not find the book id
     printf("\nInvalid id. ");
     return 0;
 }
@@ -306,10 +341,12 @@ void search_book(BookArray *headNode) {
             case 1: {
                 BookArray *find = NULL;
                 BookArray *follow = NULL;
-                BookArray *first = NULL;
+                BookArray *first = NULL;  //output the results
+                BookArray *clear = NULL;
                 char *title = ask_question("Please enter title: ");
                 find = find_book_by_title(title, headNode->pnext);
                 first = find;
+                clear = first;
                 follow = find;
                 while (find != NULL) {
                     find = find->pnext;
@@ -320,10 +357,12 @@ void search_book(BookArray *headNode) {
                     follow->searchlink = find;
                     follow = follow->searchlink;
                 }
-                printf("\nID\tTitle\t\t\t\tAuthors\t\t\t\tYear\t\tCopies\n");
+                printf("\nID\tTitle\t\t\t\t\tAuthors\t\t\t\t\tYear\tCopies");
                 while (first != NULL) {
                     display_books(first);
                     first = first->searchlink;
+                    clear->searchlink = NULL;
+                    clear = first;
                 }
                 printf("\n");
                 break;
@@ -332,9 +371,15 @@ void search_book(BookArray *headNode) {
                 BookArray *find = NULL;
                 BookArray *follow = NULL;
                 BookArray *first = NULL;
+                BookArray *clear = NULL;
                 char *author = ask_question("Please enter author: ");
                 find = find_book_by_author(author, headNode->pnext);
+                if(nonumber(author)){
+                    printf("Invalid author. ");
+                    break;
+                }
                 first = find;
+                clear = first;
                 follow = find;
                 while (find != NULL) {
                     find = find->pnext;
@@ -345,21 +390,30 @@ void search_book(BookArray *headNode) {
                     follow->searchlink = find;
                     follow = follow->searchlink;
                 }
-                printf("\nID\tTitle\t\t\t\tAuthors\t\t\t\tYear\t\tCopies\n");
+                printf("\nID\tTitle\t\t\t\t\tAuthors\t\t\t\t\tYear\tCopies");
                 while (first != NULL) {
                     display_books(first);
                     first = first->searchlink;
+                    clear->searchlink = NULL;
+                    clear = first;
                 }
                 printf("\n");
+
                 break;
             }
             case 3: {
                 BookArray *find = NULL;
                 BookArray *follow = NULL;
                 BookArray *first = NULL;
+                BookArray *clear = NULL;
                 int year = atoi(ask_question("Please enter year: "));
+                if(year == 0){
+                    printf("Invalid year. ");
+                    break;
+                }
                 find = find_book_by_year(year, headNode->pnext);
                 first = find;
+                clear = find;
                 follow = find;
                 while (find != NULL) {
                     find = find->pnext;
@@ -371,10 +425,13 @@ void search_book(BookArray *headNode) {
                     follow = follow->searchlink;
 
                 }
-                printf("\nID\tTitle\t\t\t\tAuthors\t\t\t\tYear\t\tCopies\n");
+                printf("\nID\tTitle\t\t\t\t\tAuthors\t\t\t\t\tYear\tCopies");
+                // Clear the searchlink
                 while (first != NULL) {
                     display_books(first);
                     first = first->searchlink;
+                    clear->searchlink = NULL;
+                    clear = first;
                 }
                 printf("\n");
                 break;
